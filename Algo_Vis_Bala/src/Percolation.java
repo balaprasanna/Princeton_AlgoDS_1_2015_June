@@ -16,8 +16,8 @@ import java.util.logging.Logger;
 
 public class Percolation {
    
-   public static double SCALEFACTOR =  (0.075/4);
-   public static double pointerSize = (0.050/4);
+   public static double SCALEFACTOR =  (0.075/2);
+   public static double pointerSize = (0.050/2);
    public static int window_width = 800;
    public static int window_height = 800;
    int[][] model; // original matrix
@@ -30,7 +30,7 @@ public class Percolation {
    {
        if(N<0){ throw new IndexOutOfBoundsException("N should be > 0"); }
         
-       _N= N;
+       _N = N;
        model = new int[N][N];
        _qf = new WeightedQuickUnionUF((N * N) + 2);
        virtualTop = N*N;
@@ -38,11 +38,12 @@ public class Percolation {
        init(); 
    }
    
-    void init(){
+    void init()
+    { // o(N2) matrix initalization 
         for(int i=0;i<_N;i++)
             for(int j=0;j<_N;j++)            
                 model[i][j] = 0; //model[i][j] = pos(i, j);            
-        prepareToDraw();
+        prepareToDraw(); 
         print(model, _N);
     }
    
@@ -57,16 +58,13 @@ public class Percolation {
        checkBoundsAndThrow(j);       
        if(!isOpen(i, j))
        {  
-       model[i][j] = 1; // To Open a site        
-       adjacentSitesPredictor(i,j); 
-       draw(i, j,(model[i][j] == 1) ? true : false);
-       return true;
-       }else
-       {
-           return false;
+        model[i][j] = 1; // To Open a site        
+        adjacentSitesPredictor(i,j); 
+        draw(i, j,(model[i][j] == 1) ? true : false);
+        return true;
        }
-       
-       
+       else
+       {return false;}              
    }
    
    public boolean isOpen(int i, int j)     // is site (row i, column j) open?
@@ -84,55 +82,11 @@ public class Percolation {
         */
        checkBoundsAndThrow(i);
        checkBoundsAndThrow(j);
-       if(isOpen(i, j))
-       {
-                int _i = i;        int _j = j;
-                // right possible
-               if(j+1 < _N)
-               {       _i = i;       _j = j+1;
-                if(isOpen(_i, _j)){
-                    if(_qf.connected(pos(i,j), pos(_i,_j)))
-                    {isFullHelper(i, j, _i, _j);
-                     status = true;
-                    }
-                }
-               } 
-                // left possible
-               if(j-1 >= 0)
-               {       _i = i;       _j = j-1;
-               if(isOpen(_i, _j)){
-                   if(_qf.connected(pos(i,j), pos(_i,_j)))
-                    {isFullHelper(i, j, _i, _j);
-                     status = true;
-                    }
-               }
-               }
-               // down possible
-               if(i+1 < _N)
-               {       _i = i+1;       _j = j;
-               if(isOpen(_i, _j)){
-                   if(_qf.connected(pos(i,j), pos(_i,_j)))
-                    {isFullHelper(i, j, _i, _j);
-                     status = true;
-                    }
-               }
-               }
-                   // up possible   
-               if(i-1 >= 0)
-               {       _i = i-1;       _j = j;
-               if(isOpen(_i, _j)){
-                   if(_qf.connected(pos(i,j), pos(_i,_j)))
-                    {isFullHelper(i, j, _i, _j);
-                     status = true;
-                    }
-               }
-               }
-       }
-       else{
-           return status;
-       }
-            
        
+         if(_qf.connected(virtualTop, pos(i,j)))
+         {
+             status = true;
+         }
    return status; 
    }
    public boolean percolates()             // does the system percolate?
@@ -176,20 +130,27 @@ public class Percolation {
          if(open(a,b))
             {
                 opensitesCount++;
+                //sleepBaby(300);
                 if(isFull(a, b))
                    {drawIsFull(a,b);}
+                //sleepBaby(1000);
+                
                 if(percolates() == true)
                    {   
                    openAnotherSite = false;
                    StdOut.println("Iterations "+i +" of "+ (_N*_N));
-                   StdOut.println("Percolateing with opensites ="+ opensitesCount);   
+                   StdOut.println("Percolateing with opensites ="+ opensitesCount);
+                   StdOut.println("Percolation Thresold is "+ (((double)opensitesCount) / ((double)(_N*_N))));
+                                   bruteForceDraw(_N);
                    break;
-                   }                                       
+                   }
             }           
          i++;
        }    
    }
    
+   
+     
    void adjacentSitesPredictor(int i, int j)
    {   
    // given a site , this module can predict adjacent possible sites and help u with possible sites
@@ -227,12 +188,13 @@ public class Percolation {
    }
    
    if(i == 0){
-                 unionVirtualTopOrBottom(pos(_i,_j), virtualTop); 
+               unionVirtualTopOrBottom(pos(i,j), virtualTop); 
    }
    
-   if(i == _N-1)
+   if(i == _N-1 )
    {
-               unionVirtualTopOrBottom(pos(_i,_j), virtualBottom);   
+               unionVirtualTopOrBottom(pos(i,j), virtualBottom);
+               
    }
 
    
@@ -280,6 +242,24 @@ public class Percolation {
    
    // Visual related methods
    
+   void bruteForceDraw(int size){
+     
+       for (int i = 0; i < size; i++) {
+           for (int j = 0; j < size; j++) {             
+               if(isFull(i, j)){
+                   drawIsFull(i, j);
+                  
+               }
+               else if(isOpen(i, j)){
+                   draw(i, j, true);
+               }else
+               {
+                   draw(i, j, false);                   
+               }
+           }
+       }
+   
+   }
    void print(int[][] matrix, int size)
    {
        for (int i = 0; i < size; i++) {
