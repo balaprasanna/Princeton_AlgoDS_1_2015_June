@@ -16,10 +16,10 @@ import java.util.logging.Logger;
 
 public class Percolation {
    
-   public static double SCALEFACTOR =  (0.075/2);
-   public static double pointerSize = (0.050/2);
-   public static int window_width = 800;
-   public static int window_height = 800;
+   public static double SCALEFACTOR =  (0.075);
+   public static double pointerSize = (0.050);
+   public static int window_width = 500;
+   public static int window_height = 500;
    int[][] model; // original matrix
    int _N; // to store size of Matrix N*N
    int virtualTop;
@@ -130,10 +130,10 @@ public class Percolation {
          if(open(a,b))
             {
                 opensitesCount++;
-                //sleepBaby(300);
+                sleepBaby(300);
                 if(isFull(a, b))
                    {drawIsFull(a,b);}
-                //sleepBaby(1000);
+                sleepBaby(1000);
                 
                 if(percolates() == true)
                    {   
